@@ -76,6 +76,16 @@ function DebtDetailContent({ params }) {
     onConfirm: () => {},
   });
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-5xl mx-auto pb-12">
+        <Skeleton className="h-10 w-40 rounded-xl" />
+        <Skeleton className="h-48 w-full rounded-2xl" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
   if (!debt) {
     return (
       <div className="text-center py-16 space-y-4">

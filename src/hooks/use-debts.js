@@ -4,7 +4,7 @@ import { useMockData } from "@/lib/mock-store";
 import { useMemo } from "react";
 
 export function useDebts(typeFilter) {
-  const { debts, addDebt, payInstallment, deletePayment, deleteDebt, cancelDebt } = useMockData();
+  const { debts, isLoading, addDebt, payInstallment, deletePayment, deleteDebt, cancelDebt } = useMockData();
 
   const filtered = useMemo(() => {
     if (!typeFilter) return debts;
@@ -43,7 +43,7 @@ export function useDebts(typeFilter) {
     debts: filtered,
     allDebts: debts,
     stats,
-    isLoading: false,
+    isLoading,
     addDebt,
     payInstallment,
     deletePayment,
@@ -53,12 +53,12 @@ export function useDebts(typeFilter) {
 }
 
 export function useDebtDetail(debtId) {
-  const { debts, payInstallment, deletePayment, deleteDebt, cancelDebt } = useMockData();
+  const { debts, isLoading, payInstallment, deletePayment, deleteDebt, cancelDebt } = useMockData();
   const debt = useMemo(() => debts.find((d) => d.id === debtId), [debts, debtId]);
 
   return {
     debt,
-    isLoading: false,
+    isLoading,
     payInstallment: (installmentId, data) => payInstallment(debtId, installmentId, data),
     deletePayment: (paymentId) => deletePayment(debtId, paymentId),
     deleteDebt: () => deleteDebt(debtId),

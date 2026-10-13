@@ -15,6 +15,7 @@ import { AmountText } from "@/components/common/AmountText";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useAccounts } from "@/hooks/use-accounts";
 import { formatRupiah, formatDate } from "@/lib/format";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   PieChart as PieChartIcon,
   BarChart3,
@@ -38,7 +39,7 @@ import {
 
 
 export default function ReportsPage() {
-  const { allTransactions } = useTransactions();
+  const { allTransactions, isLoading } = useTransactions();
   const { accounts } = useAccounts();
 
   // Filters state
@@ -208,107 +209,121 @@ export default function ReportsPage() {
 
         {/* ================= TAB 1: CASHFLOW ================= */}
         <TabsContent value="cashflow" className="space-y-6 focus-visible:outline-none">
-          {/* Summary Metric Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/20">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                Total Masuk
-              </span>
-              <div className="mt-1">
-                <AmountText amount={totals.income} type="INCOME" showSign size="xl" />
+          {isLoading ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Skeleton className="h-20 rounded-2xl" />
+                <Skeleton className="h-20 rounded-2xl" />
+                <Skeleton className="h-20 rounded-2xl" />
               </div>
+              <Skeleton className="h-72 rounded-2xl" />
+              <Skeleton className="h-48 rounded-2xl" />
             </div>
-            <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/20">
-              <span className="text-xs font-bold uppercase tracking-wider text-rose-700">
-                Total Keluar
-              </span>
-              <div className="mt-1">
-                <AmountText amount={totals.expense} type="EXPENSE" showSign size="xl" />
+          ) : (
+            <>
+              {/* Summary Metric Strip */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-4 rounded-2xl border border-emerald-100 bg-emerald-50/20">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
+                    Total Masuk
+                  </span>
+                  <div className="mt-1">
+                    <AmountText amount={totals.income} type="INCOME" showSign size="xl" />
+                  </div>
+                </div>
+                <div className="p-4 rounded-2xl border border-rose-100 bg-rose-50/20">
+                  <span className="text-xs font-bold uppercase tracking-wider text-rose-700">
+                    Total Keluar
+                  </span>
+                  <div className="mt-1">
+                    <AmountText amount={totals.expense} type="EXPENSE" showSign size="xl" />
+                  </div>
+                </div>
+                <div className="p-4 rounded-2xl border border-slate-200 bg-white">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Arus Kas Bersih
+                  </span>
+                  <div className="mt-1">
+                    <AmountText amount={totals.net} type="NEUTRAL" showSign size="xl" />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="p-4 rounded-2xl border border-slate-200 bg-white">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Arus Kas Bersih
-              </span>
-              <div className="mt-1">
-                <AmountText amount={totals.net} type="NEUTRAL" showSign size="xl" />
-              </div>
-            </div>
-          </div>
 
-          {/* Cashflow Bar Chart */}
-          <Card className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-            <h3 className="text-base font-bold text-slate-900">
-              Grafik Arus Kas Harian
-            </h3>
-            <div className="h-64 sm:h-72 w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={cashflowData}>
-                  <XAxis
-                    dataKey="formattedPeriod"
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="#94a3b8"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`}
-                  />
-                  <Tooltip
-                    formatter={(val) => [formatRupiah(val), ""]}
-                    contentStyle={{
-                      backgroundColor: "#ffffff",
-                      borderRadius: "12px",
-                      border: "1px solid #e2e8f0",
-                    }}
-                  />
-                  <Bar dataKey="income" name="Masuk" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expense" name="Keluar" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
+              {/* Cashflow Bar Chart */}
+              <Card className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+                <h3 className="text-base font-bold text-slate-900">
+                  Grafik Arus Kas Harian
+                </h3>
+                <div className="h-64 sm:h-72 w-full pt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={cashflowData}>
+                      <XAxis
+                        dataKey="formattedPeriod"
+                        stroke="#94a3b8"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#94a3b8"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`}
+                      />
+                      <Tooltip
+                        formatter={(val) => [formatRupiah(val), ""]}
+                        contentStyle={{
+                          backgroundColor: "#ffffff",
+                          borderRadius: "12px",
+                          border: "1px solid #e2e8f0",
+                        }}
+                      />
+                      <Bar dataKey="income" name="Masuk" fill="#10b981" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="expense" name="Keluar" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
 
-          {/* Table Summary per Date */}
-          <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-xs p-5 overflow-hidden">
-            <h3 className="text-base font-bold text-slate-900 mb-4">
-              Tabel Rincian Arus Kas
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="py-3 px-3">Periode</th>
-                    <th className="py-3 px-3 text-right">Pemasukan</th>
-                    <th className="py-3 px-3 text-right">Pengeluaran</th>
-                    <th className="py-3 px-3 text-right">Selisih</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {cashflowData.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/70">
-                      <td className="py-3 px-3 font-semibold text-slate-800">
-                        {row.formattedPeriod}
-                      </td>
-                      <td className="py-3 px-3 text-right font-bold text-emerald-600 tabular-nums">
-                        +{formatRupiah(row.income)}
-                      </td>
-                      <td className="py-3 px-3 text-right font-bold text-rose-600 tabular-nums">
-                        −{formatRupiah(row.expense)}
-                      </td>
-                      <td className="py-3 px-3 text-right font-extrabold tabular-nums">
-                        <AmountText amount={row.net} type="NEUTRAL" showSign />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+              {/* Table Summary per Date */}
+              <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-xs p-5 overflow-hidden">
+                <h3 className="text-base font-bold text-slate-900 mb-4">
+                  Tabel Rincian Arus Kas
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        <th className="py-3 px-3">Periode</th>
+                        <th className="py-3 px-3 text-right">Pemasukan</th>
+                        <th className="py-3 px-3 text-right">Pengeluaran</th>
+                        <th className="py-3 px-3 text-right">Selisih</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {cashflowData.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/70">
+                          <td className="py-3 px-3 font-semibold text-slate-800">
+                            {row.formattedPeriod}
+                          </td>
+                          <td className="py-3 px-3 text-right font-bold text-emerald-600 tabular-nums">
+                            +{formatRupiah(row.income)}
+                          </td>
+                          <td className="py-3 px-3 text-right font-bold text-rose-600 tabular-nums">
+                            −{formatRupiah(row.expense)}
+                          </td>
+                          <td className="py-3 px-3 text-right font-extrabold tabular-nums">
+                            <AmountText amount={row.net} type="NEUTRAL" showSign />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </>
+          )}
         </TabsContent>
 
         {/* ================= TAB 2: KATEGORI ================= */}
@@ -333,66 +348,98 @@ export default function ReportsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Donut Chart */}
-            <Card className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col items-center justify-center">
-              <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      dataKey="total"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={65}
-                      outerRadius={95}
-                      paddingAngle={3}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cat-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(val) => [formatRupiah(val), ""]} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-
-            {/* Category Breakdown Table */}
-            <Card className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs overflow-hidden">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
-                Breakdown Persentase
-              </h3>
-              <div className="divide-y divide-slate-100">
-                {categoryData.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50 px-2 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span
-                        className="w-3 h-3 rounded-full shrink-0 shadow-2xs"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-sm font-medium text-slate-800">
-                        {item.name}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-right">
-                      <span className="text-sm font-bold text-slate-900 tabular-nums">
-                        {formatRupiah(item.total)}
-                      </span>
-                      <span className="text-xs font-extrabold text-slate-400 w-10 tabular-nums">
-                        {item.percent}%
-                      </span>
-                    </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Skeleton Donut Chart */}
+              <Card className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col items-center justify-center">
+                <Skeleton className="h-64 w-full rounded-xl" />
+              </Card>
+              {/* Skeleton Breakdown Table */}
+              <Card className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs overflow-hidden">
+                <Skeleton className="h-5 w-40 rounded-lg mb-4" />
+                <div className="space-y-3">
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Donut Chart */}
+              <Card className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col items-center justify-center">
+                {categoryData.length > 0 ? (
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={categoryData}
+                          dataKey="total"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={65}
+                          outerRadius={95}
+                          paddingAngle={3}
+                        >
+                          {categoryData.map((entry, index) => (
+                            <Cell key={`cat-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(val) => [formatRupiah(val), ""]} />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
-              </div>
-            </Card>
-          </div>
+                ) : (
+                  <div className="h-64 w-full flex items-center justify-center text-slate-400 text-xs italic">
+                    Tidak ada data {categoryReportType === "EXPENSE" ? "pengeluaran" : "pemasukan"}
+                  </div>
+                )}
+              </Card>
+
+              {/* Category Breakdown Table */}
+              <Card className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs overflow-hidden">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
+                  Breakdown Persentase
+                </h3>
+                {categoryData.length > 0 ? (
+                  <div className="divide-y divide-slate-100">
+                    {categoryData.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50 px-2 rounded-lg"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className="w-3 h-3 rounded-full shrink-0 shadow-2xs"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="text-sm font-medium text-slate-800">
+                            {item.name}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-right">
+                          <span className="text-sm font-bold text-slate-900 tabular-nums">
+                            {formatRupiah(item.total)}
+                          </span>
+                          <span className="text-xs font-extrabold text-slate-400 w-10 tabular-nums">
+                            {item.percent}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-xs text-slate-400 italic">
+                    Tidak ada data {categoryReportType === "EXPENSE" ? "pengeluaran" : "pemasukan"}
+                  </div>
+                )}
+              </Card>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

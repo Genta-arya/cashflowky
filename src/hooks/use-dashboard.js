@@ -5,8 +5,8 @@ import { useMemo } from "react";
 import { format, subMonths } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 
-export function useDashboard(monthStr) {
-  const { accounts, categories, transactions, debts } = useMockData();
+export function useDashboard(selectedDate = new Date()) {
+  const { accounts, categories, transactions, debts, isLoading } = useMockData();
 
   const summary = useMemo(() => {
     // 1. Total balance of active accounts (live dari database)
@@ -14,13 +14,22 @@ export function useDashboard(monthStr) {
       .filter((a) => a.isActive)
       .reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
 
-    // 2. Transaksi bulan berjalan / selected month
+    // 2. Filter transaksi sesuai BULAN dan TAHUN yang dipilih di filter
+    const targetYear = selectedDate instanceof Date ? selectedDate.getFullYear() : new Date().getFullYear();
+    const targetMonth = selectedDate instanceof Date ? selectedDate.getMonth() : new Date().getMonth();
+
     let income = 0;
     let expense = 0;
+    const monthTransactions = [];
+
     transactions.forEach((tx) => {
-      const amt = Number(tx.amount) || 0;
-      if (tx.type === "INCOME") income += amt;
-      else if (tx.type === "EXPENSE") expense += amt;
+      const txDate = new Date(tx.date);
+      if (txDate.getFullYear() === targetYear && txDate.getMonth() === targetMonth) {
+        monthTransactions.push(tx);
+        const amt = Number(tx.amount) || 0;
+        if (tx.type === "INCOME") income += amt;
+        else if (tx.type === "EXPENSE") expense += amt;
+      }
     });
 
     // 3. Utang dan Piutang Aktif
@@ -42,12 +51,10 @@ export function useDashboard(monthStr) {
       }
     });
 
-    // 5. Tren 6 Bulan Terakhir (dihitung real-time dari array transactions)
-    const now = new Date();
+    // 5. Tren 6 Bulan Terakhir dihitung mundur dari selectedDate
     const trend6m = [];
-
     for (let i = 5; i >= 0; i--) {
-      const d = subMonths(now, i);
+      const d = subMonths(selectedDate, i);
       const year = d.getFullYear();
       const month = d.getMonth();
       const monthLabel = format(d, "MMM yy", { locale: localeId });
@@ -71,14 +78,14 @@ export function useDashboard(monthStr) {
       });
     }
 
-    // 6. Pengeluaran per Kategori (dihitung real-time dari transactions)
+    // 6. Pengeluaran per Kategori khusus untuk bulan yang dipilih
     const categoryTotals = {};
     const categoryColorMap = {};
     (categories || []).forEach((c) => {
       categoryColorMap[c.name] = c.color || "#64748b";
     });
 
-    transactions.forEach((tx) => {
+    monthTransactions.forEach((tx) => {
       if (tx.type === "EXPENSE") {
         const catName = tx.category?.name || "Lainnya";
         categoryTotals[catName] = (categoryTotals[catName] || 0) + (Number(tx.amount) || 0);
@@ -93,7 +100,7 @@ export function useDashboard(monthStr) {
       }))
       .sort((a, b) => b.total - a.total);
 
-    // 7. Jatuh tempo terdekat (Upcoming dues real-time dari debts)
+    // 7. Jatuh tempo terdekat
     const upcomingDues = [];
     debts.forEach((d) => {
       if (d.status === "ACTIVE" && d.installments) {
@@ -132,12 +139,12 @@ export function useDashboard(monthStr) {
       trend6m,
       expenseByCategory,
       upcomingDues: upcomingDues.slice(0, 5),
-      recentTransactions: transactions.slice(0, 5),
+      recentTransactions: monthTransactions.slice(0, 5),
     };
-  }, [accounts, categories, transactions, debts, monthStr]);
+  }, [accounts, categories, transactions, debts, selectedDate]);
 
   return {
     summary,
-    isLoading: false,
+    isLoading,
   };
 }

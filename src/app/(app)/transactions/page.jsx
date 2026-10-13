@@ -20,6 +20,7 @@ import { useTransactions } from "@/hooks/use-transactions";
 import { useAccounts } from "@/hooks/use-accounts";
 import { useCategories } from "@/hooks/use-categories";
 import { formatDate } from "@/lib/format";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Plus,
   Search,
@@ -52,6 +53,7 @@ export default function TransactionsPage() {
   const {
     transactions,
     summary,
+    isLoading,
     addTransaction,
     updateTransaction,
     deleteTransaction,
@@ -271,7 +273,16 @@ export default function TransactionsPage() {
       </Card>
 
       {/* Transaction List Grouped by Date */}
-      {transactions.length === 0 ? (
+      {isLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-32 rounded-lg" />
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 space-y-3">
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+        </div>
+      ) : transactions.length === 0 ? (
         <EmptyState
           icon={<ReceiptText className="w-8 h-8" />}
           title="Tidak ada transaksi yang cocok"

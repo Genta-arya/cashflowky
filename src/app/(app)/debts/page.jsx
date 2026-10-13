@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useDebts } from "@/hooks/use-debts";
 import { formatRupiah, formatDate, formatRelativeDue } from "@/lib/format";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   HandCoins,
   Plus,
@@ -37,7 +38,7 @@ export default function DebtsPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("DUE_DATE");
 
-  const { debts, allDebts } = useDebts(activeTab);
+  const { debts, allDebts, isLoading } = useDebts(activeTab);
 
   const filteredDebts = debts.filter((d) => {
     if (statusFilter === "ALL") return true;
@@ -113,7 +114,12 @@ export default function DebtsPage() {
       </div>
 
       {/* Debt List Cards */}
-      {filteredDebts.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Skeleton className="h-44 rounded-2xl" />
+          <Skeleton className="h-44 rounded-2xl" />
+        </div>
+      ) : filteredDebts.length === 0 ? (
         <EmptyState
           icon={<HandCoins className="w-8 h-8" />}
           title={`Belum ada data ${activeTab === "PAYABLE" ? "utang" : "piutang"}`}

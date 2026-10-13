@@ -4,7 +4,7 @@ import { useMockData } from "@/lib/mock-store";
 import { useMemo } from "react";
 
 export function useTransactions(filters = {}) {
-  const { transactions, addTransaction, updateTransaction, deleteTransaction } = useMockData();
+  const { transactions, isLoading, addTransaction, updateTransaction, deleteTransaction } = useMockData();
 
   const filtered = useMemo(() => {
     return transactions.filter((tx) => {
@@ -35,7 +35,7 @@ export function useTransactions(filters = {}) {
     transactions: filtered,
     allTransactions: transactions,
     summary,
-    isLoading: false,
+    isLoading,
     addTransaction,
     updateTransaction,
     deleteTransaction,
