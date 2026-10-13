@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: 210 40% 98%; /* slate-50 */
+  --foreground: 222 47% 11%; /* slate-900 */
+  
+  --card: 0 0% 100%; /* white */
+  --card-foreground: 222 47% 11%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  
+  --primary: 243 75% 59%; /* indigo-600 #4f46e5 */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 210 40% 96.1%; /* slate-100 */
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215 16% 47%; /* slate-500 */
+  
+  --accent: 210 40% 94%;
+  --accent-foreground: 222 47% 11%;
+  
+  --destructive: 346 84% 61%; /* rose-600 */
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 214 32% 91%; /* slate-200 */
+  --input: 214 32% 91%;
+  --ring: 243 75% 59%; /* indigo-600 */
+
+  --radius: 0.75rem;
+
+  /* Custom DuitKu Tokens */
+  --income: 160 84% 39%; /* emerald-600 */
+  --income-bg: 152 76% 96%; /* emerald-50 */
+  
+  --expense: 346 84% 61%; /* rose-600 */
+  --expense-bg: 355 100% 97%; /* rose-50 */
+  
+  --warning: 38 92% 50%; /* amber-500 */
+  --warning-bg: 48 100% 96%; /* amber-50 */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }

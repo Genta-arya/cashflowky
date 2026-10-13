@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  CASH
+  BANK
+  EWALLET
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionSource {
+  MANUAL
+  DEBT_PAYMENT
+}
+
+enum DebtType {
+  PAYABLE      // Utang: saya yang harus bayar
+  RECEIVABLE   // Piutang: orang lain yang harus bayar ke saya
+}
+
+enum DebtStatus {
+  ACTIVE
+  PAID
+  CANCELED
+}
+
+enum InstallmentStatus {
+  PENDING
+  PARTIAL
+  PAID
+}
+
+model Account {
+  id             String      @id @default(cuid())
+  name           String      @unique @db.VarChar(100)
+  type           AccountType @default(CASH)
+  initialBalance Decimal     @default(0) @db.Decimal(15, 2)
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  transactions Transaction[]
+  payments     DebtPayment[]
+}
+
+model Category {
+  id        String       @id @default(cuid())
+  name      String       @db.VarChar(100)
+  type      CategoryType
+  color     String       @default("#64748b") @db.VarChar(7)
+  isSystem  Boolean      @default(false) // kategori sistem tidak boleh dihapus
+  createdAt DateTime     @default(now())
+
+  transactions Transaction[]
+
+  @@unique([name, type])
+  @@index([type])
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(100)
+  phone     String?  @db.VarChar(30)
+  note      String?  @db.VarChar(255)
+  createdAt DateTime @default(now())
+
+  debts Debt[]
+}
+
+model Transaction {
+  id         String            @id @default(cuid())
+  accountId  String
+  categoryId String?
+  type       TransactionType
+  amount     Decimal           @db.Decimal(15, 2)
+  date       DateTime          @db.Date
+  note       String?           @db.VarChar(255)
+  source     TransactionSource @default(MANUAL)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  account     Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  debtPayment DebtPayment?
+
+  @@index([date])
+  @@index([type, date])
+  @@index([accountId])
+}
+
+model Debt {
+  id              String     @id @default(cuid())
+  contactId       String
+  type            DebtType
+  title           String     @db.VarChar(150)
+  principalAmount Decimal    @db.Decimal(15, 2) // pokok (info)
+  totalAmount     Decimal    @db.Decimal(15, 2) // = jumlah semua cicilan (dihitung ulang otomatis)
+  startDate       DateTime   @db.Date
+  status          DebtStatus @default(ACTIVE)
+  note            String?    @db.VarChar(500)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  contact      Contact           @relation(fields: [contactId], references: [id], onDelete: Restrict)
+  installments DebtInstallment[]
+
+  @@index([type, status])
+}
+
+model DebtInstallment {
+  id         String            @id @default(cuid())
+  debtId     String
+  sequence   Int               // urutan 1,2,3 (urut berdasar dueDate)
+  dueDate    DateTime          @db.Date
+  amount     Decimal           @db.Decimal(15, 2)
+  paidAmount Decimal           @default(0) @db.Decimal(15, 2)
+  status     InstallmentStatus @default(PENDING)
+  paidAt     DateTime?         @db.Date // tanggal pelunasan penuh
+  note       String?           @db.VarChar(255)
+
+  debt     Debt          @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  payments DebtPayment[]
+
+  @@unique([debtId, sequence])
+  @@index([dueDate, status])
+}
+
+model DebtPayment {
+  id            String   @id @default(cuid())
+  installmentId String
+  accountId     String
+  transactionId String   @unique // transaksi kas yang otomatis dibuat
+  amount        Decimal  @db.Decimal(15, 2)
+  paidDate      DateTime @db.Date
+  note          String?  @db.VarChar(255)
+  createdAt     DateTime @default(now())
+
+  installment DebtInstallment @relation(fields: [installmentId], references: [id], onDelete: Cascade)
+  account     Account         @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  transaction Transaction     @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+
+  @@index([installmentId])
+}
