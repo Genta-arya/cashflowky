@@ -364,7 +364,7 @@ export default function TransactionsPage() {
                         />
 
                         {!isLocked && (
-                          <div className="hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -372,7 +372,7 @@ export default function TransactionsPage() {
                                 e.stopPropagation();
                                 handleEditClick(tx);
                               }}
-                              className="h-8 w-8 text-slate-400 hover:text-indigo-600 rounded-lg"
+                              className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </Button>
@@ -383,7 +383,7 @@ export default function TransactionsPage() {
                                 e.stopPropagation();
                                 handleDeleteClick(tx);
                               }}
-                              className="h-8 w-8 text-slate-400 hover:text-rose-600 rounded-lg"
+                              className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
